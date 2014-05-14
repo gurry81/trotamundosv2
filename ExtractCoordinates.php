@@ -1,16 +1,27 @@
 <?php 
 	class ExtractCoordinates{
+
 		public $path;
+
+
 		public $format;
+
+
 		private $xml;
+
+
 		private $format_function = array(
 			"kml" => "KML_to_JSON",
 			"gpx" => "GPX_to_JSON"
 		);
 
-		 function __construct($path){
+
+
+		function __construct($path){
 			$this->path = $path;
 		}
+
+
 
 		public function extract (){
 
@@ -29,7 +40,9 @@
 
 		}
 
-		 static function KML_to_JSON($kml = null){
+
+
+		static function KML_to_JSON($kml = null){
 
 			if ($kml == false)
 				return false;
@@ -45,6 +58,8 @@
 
 			return (json_encode($coordinates));
 		}
+
+
 
 		static function GPX_to_JSON($gpx = null){
 
@@ -68,6 +83,8 @@
 
 		}
 
+		
+
 		function get_format(){
 			$this->xml = simplexml_load_file($this->path);
 
@@ -84,7 +101,7 @@
 	
 	$ec = new ExtractCoordinates("/home/ismael/Descargas/example.gpx");
 	$res = $ec->extract();
-	// var_dump($res);
+
 	header('Content-Type: application/json');
 	echo $res;
 
