@@ -9,7 +9,7 @@
 		function showCoordinates(){
 
 			$.ajax({
-				url : 'info.php',
+				url : 'ExtractCoordinates.php',
 				success : function (response,status,xhr){
 					analize(xhr.responseText);
 					show();
