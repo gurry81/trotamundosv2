@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script type="text/javascript" src="libs/jquery.js"></script>
+	<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+	<script type="text/javascript">
+
+		function showCoordinates(){
+
+			$.ajax({
+				url : 'ExtractCoordinates.php',
+				success : function (response,status,xhr){
+					analize(xhr.responseText);
+					show();
+					initialize();
+				}
+
+			});
+
+
+		}
+
+		function analize(json){
+			var djson = JSON.parse(json);
+			format = djson["format"];
+			coordinates = djson["coord"];
+		}
+
+		function show(){
+				var LAT = 0;
+				var LON = 1;
+
+				 mapsCoord = [];
+				 boundsM = {"min": {"lat":null, "lon":null}, "max":{"lat":null, "lon":null}};
+
+				switch (format){
+					case "kml" : 
+
+						for (var x in coordinates) {
+
+							boundsM["min"]["lat"] = (!(boundsM["min"]["lat"]) || coordinates[x][LAT] < boundsM["min"]["lat"])? coordinates[x][LAT] : boundsM["min"]["lat"];			
+							boundsM["min"]["lon"] = (!(boundsM["min"]["lon"]) || coordinates[x][LON] < boundsM["min"]["lon"])? coordinates[x][LON] : boundsM["min"]["lon"];			
+							boundsM["max"]["lat"] = (!(boundsM["max"]["lat"]) || coordinates[x][LAT] > boundsM["max"]["lat"])? coordinates[x][LAT] : boundsM["max"]["lat"];			
+							boundsM["max"]["lon"] = (!(boundsM["max"]["lon"]) || coordinates[x][LON] > boundsM["max"]["lon"])? coordinates[x][LON] : boundsM["max"]["lon"];
+
+							mapsCoord.push(new google.maps.LatLng(coordinates[x][LAT], coordinates[x][LON]));
+
+						}
+
+						break;
+					case "gpx" : 
+						for (var x in coordinates) {
+
+							boundsM["min"]["lat"] = (!(boundsM["min"]["lat"]) || coordinates[x][LAT][0] < boundsM["min"]["lat"])? coordinates[x][LAT][0] : boundsM["min"]["lat"];			
+							boundsM["min"]["lon"] = (!(boundsM["min"]["lon"]) || coordinates[x][LON][0] < boundsM["min"]["lon"])? coordinates[x][LON][0] : boundsM["min"]["lon"];			
+							boundsM["max"]["lat"] = (!(boundsM["max"]["lat"]) || coordinates[x][LAT][0] > boundsM["max"]["lat"])? coordinates[x][LAT][0] : boundsM["max"]["lat"];			
+							boundsM["max"]["lon"] = (!(boundsM["max"]["lon"]) || coordinates[x][LON][0] > boundsM["max"]["lon"])? coordinates[x][LON][0] : boundsM["max"]["lon"];
+
+							mapsCoord.push(new google.maps.LatLng(coordinates[x][LAT][0], coordinates[x][LON][0]));
+
+						}
+						break;
+				}
+
+		}
+
+		// GMAPS
+
+		function initialize() {
+		  var mapOptions = {
+		    mapTypeId: google.maps.MapTypeId.TERRAIN
+		  };
+
+		  var map = new google.maps.Map(document.getElementById('salida'),
+		      mapOptions);
+
+		  var bounds = new google.maps.LatLngBounds();
+			bounds.extend(new google.maps.LatLng(boundsM["min"]["lat"],boundsM["min"]["lon"]));
+			bounds.extend(new google.maps.LatLng(boundsM["max"]["lat"],boundsM["max"]["lon"]));
+
+		  map.fitBounds(bounds);
+
+		  var flightPath = new google.maps.Polyline({
+		    path: mapsCoord,
+		    geodesic: true,
+		    strokeColor: '#FF0000',
+		    strokeOpacity: 1.0,
+		    strokeWeight: 5
+		  });
+
+		  flightPath.setMap(map);
+		}
+
+	</script>
+	<style type="text/css">
+      #salida {
+        height: 300px;
+        width: 600px;
+        margin: 0px;
+        padding: 0px
+      }
+
+	</style>
+</head>
+<body>
+<div id="salida"></div>
+<button onclick="showCoordinates()">Ver coordenadas</button>
+</body>
+</html>
